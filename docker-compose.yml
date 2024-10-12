@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '1'
+        max-size: '10m'
+    restart: unless-stopped
+    networks:
+      - api
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - api-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  api:
+    restart: always
+    image: lucascardo12/api_monolith
+    container_name: api
+    environment:
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      JWT_KEY: ${JWT_KEY}
+      DB_HOST: ${DB_HOST}
+      ENVIRONMENT: ${ENVIRONMENT}
+      CACHE_DB: ${CACHE_DB}
+
+    networks:
+      - api
+    ports:
+      - "8080:8080"
+  cache:
+    image: redis:6.2.16-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20
+    networks:
+      - api
+    volumes:
+      - cache:/data
+
+networks:
+  api:
+
+volumes:
+  api-db:
+  cache:
+    driver: local
