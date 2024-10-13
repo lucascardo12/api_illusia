@@ -20,7 +20,7 @@ services:
       - "5432:5432"
   api:
     restart: always
-    image: lucascardo12/api_monolith
+    build: .
     container_name: api
     environment:
       DB_DATABASE: ${DB_DATABASE}
